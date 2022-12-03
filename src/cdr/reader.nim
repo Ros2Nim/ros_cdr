@@ -30,25 +30,38 @@ proc init*(kd: typedesc[CdrReader], data: string): CdrReader =
   result.view.setPosition(4)
 
 
-template implReader(name, tp: untyped) =
-  proc `name`*(this: CdrReader): `tp` =
-    if this.littleEndian:
-      result = this.ss.`readLe name`()
-    else:
-      result = this.ss.`readBe name`()
+proc swapEndian8(x, y: ptr) = discard
+proc readInt8(ss: Stream): int8 = cast[int8](ss.readChar())
+proc readUint8(ss: Stream): uint8 = cast[uint8](ss.readChar())
+proc readUint16(ss: Stream): uint16 = cast[uint16](ss.readInt16())
+proc readUint32(ss: Stream): uint32 = cast[uint32](ss.readInt32())
+proc readUint64(ss: Stream): uint64 = cast[uint64](ss.readInt64())
 
+template implReader(NAME, TP, BS: untyped) =
+  proc `name`*(this: CdrReader): `TP` =
+    when system.cpuEndian == littleEndian:
+      if this.littleEndian:
+        result = this.ss.`read NAME BS`()
+      else:
+        var tmp: `TP BS` = this.ss.`read NAME BS`()
+        `swapEndian BS`(addr(result), addr(tmp))
+    else: # bigendian
+      if this.littleEndian:
+        var tmp: `TP BS` = this.ss.`read NAME BS`()
+        `swapEndian BS`(addr(result), addr(tmp))
+      else:
+        result = this.ss.`read NAME BS`()
 
-implReader(Uint8, uint8)
-implReader(Uint16, uint16)
-implReader(Uint32, uint32)
-implReader(Uint64, uint64)
+implReader(Uint, uint, 8)
+implReader(Uint, uint, 16)
+implReader(Uint, uint, 32)
+implReader(Uint, uint, 64)
 
-implReader(Int8, int8)
-implReader(Int16, int16)
-implReader(Int32, int32)
-implReader(Int64, int64)
+implReader(Int, int, 8)
+implReader(Int, int, 16)
+implReader(Int, int, 32)
+implReader(Int, int, 64)
 
-  
 proc readString*(): string =
     const length = this.uint32();
     if (length <= 1) {
