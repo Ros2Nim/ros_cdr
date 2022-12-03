@@ -1,6 +1,5 @@
 import std/endians
 import std/streams
-import binstream
 
 import cdrtypes
 
@@ -38,7 +37,7 @@ proc readUint32(ss: Stream): uint32 = cast[uint32](ss.readInt32())
 proc readUint64(ss: Stream): uint64 = cast[uint64](ss.readInt64())
 
 template implReader(NAME, TP, BS: untyped) =
-  proc `name`*(this: CdrReader): `TP` =
+  proc `read NAME`*(this: CdrReader): `TP BS` =
     when system.cpuEndian == littleEndian:
       if this.littleEndian:
         result = this.ss.`read NAME BS`()
@@ -62,22 +61,16 @@ implReader(Int, int, 16)
 implReader(Int, int, 32)
 implReader(Int, int, 64)
 
-proc readString*(): string =
-    const length = this.uint32();
-    if (length <= 1) {
-      this.offset += length;
-      return "";
-    
-    const data = new Uint8Array(this.view.buffer, this.view.byteOffset + this.offset, length - 1);
-    const value = this.textDecoder.decode(data);
-    this.offset += length;
-    return value;
-  }
 
-proc readSequenceLength*(): number =
-    return this.uint32();
+proc readString*(this: CdrReader): string =
+    let length = int(this.ss.readuint32())
+    if length <= 1:
+      return ""
+    return this.ss.readStr(length)
+
+proc readSequenceLength*(this: CdrReader): int =
+    return int(this.ss.readuint32())
   
-
 proc readInt8Array*(count: number = this.sequenceLength()): Int8Array =
     const array = new Int8Array(this.view.buffer, this.view.byteOffset + this.offset, count);
     this.offset += count;
