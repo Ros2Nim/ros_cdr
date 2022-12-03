@@ -15,7 +15,6 @@ proc decodedBytes*(this: CdrReader): int =
 proc byteLength*(this: CdrReader): int =
   return this.ss.data.len()
 
-
 proc newCdrReader*(data: string): CdrReader =
   new result
   if data.len < 4:
@@ -60,8 +59,11 @@ implReader(Int, int, 16)
 implReader(Int, int, 32)
 implReader(Int, int, 64)
 
+implReader(Float, float, 32)
+implReader(Float, float, 64)
+
 template implReaderBe(NAME, TP, BS: untyped) =
-  proc `read NAME BS`*(this: CdrReader): `TP BS` =
+  proc `read NAME BS Be`*(this: CdrReader): `TP BS` =
     var tmp: `TP BS` = this.ss.`read NAME BS`()
     bigEndian16(addr(result), addr(tmp))
 
@@ -74,6 +76,7 @@ implReaderBe(Int, int, 8)
 implReaderBe(Int, int, 16)
 implReaderBe(Int, int, 32)
 implReaderBe(Int, int, 64)
+
 
 proc readString*(this: CdrReader): string =
     let length = int(this.ss.readuint32())
