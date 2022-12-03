@@ -33,7 +33,6 @@ proc newCdrReader*(data: string): CdrReader =
 
 proc align(this: CdrReader, size: int): void =
     let alignment = (this.ss.getPosition() - 4) mod size
-    echo "set alignment: ", size, " align: ", alignment, " to ", $(size-alignment)
     if (alignment > 0):
       this.ss.setPosition(this.ss.getPosition() + size - alignment)
 
