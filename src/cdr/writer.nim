@@ -84,7 +84,6 @@ proc align(this: CdrWriter, size: int, bytesToWrite: int = size): void =
     for i in 0 ..< padding:
       this.ss.write(0'u8)
 
-
 proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter =
   this.align(sizeof(T))
 
@@ -105,5 +104,4 @@ proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter =
 
 proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter =
   this.align(sizeof(T))
-  var tmp: T = this.ss.`read NAME BS`()
-  bigEndian16(addr(result), addr(tmp))
+  this.ss.writeBe(val)
