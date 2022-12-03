@@ -85,47 +85,23 @@ proc align(this: CdrWriter, size: int, bytesToWrite: int = size): void =
       this.ss.write(0'u8)
 
 
-template implWriter(NAME, TP, BS: untyped) =
-  proc `read NAME BS`*(this: CdrWriter): `TP BS` =
-    this.align(BS div 8)
-    when system.cpuEndian == littleEndian:
-      if this.littleEndian:
-        result = this.ss.`read NAME BS`()
-      else:
-        var tmp: `TP BS` = this.ss.`read NAME BS`()
-        `swapEndian BS`(addr(result), addr(tmp))
-    else: # bigendian
-      if this.littleEndian:
-        var tmp: `TP BS` = this.ss.`read NAME BS`()
-        `swapEndian BS`(addr(result), addr(tmp))
-      else:
-        result = this.ss.`read NAME BS`()
+proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter =
+  this.align(sizeof(T))
 
-implWriter(Uint, uint, 8)
-implWriter(Uint, uint, 16)
-implWriter(Uint, uint, 32)
-implWriter(Uint, uint, 64)
+  when system.cpuEndian == littleEndian:
+    if this.littleEndian:
+      result = this.ss.`read NAME BS`()
+    else:
+      `swapEndian BS`(addr(result), addr(tmp))
+      `TP BS` = this.ss.`write`(tmp)
+  else: # bigendian
+    if this.littleEndian:
+      var tmp: `TP BS` = this.ss.`read NAME BS`()
+      `swapEndian BS`(addr(result), addr(tmp))
+    else:
+      result = this.ss.`read NAME BS`()
 
-implWriter(Int, int, 8)
-implWriter(Int, int, 16)
-implWriter(Int, int, 32)
-implWriter(Int, int, 64)
-
-implWriter(Float, float, 32)
-implWriter(Float, float, 64)
-
-template implWriterBe(NAME, TP, BS: untyped) =
-  proc `read NAME BS Be`*(this: CdrReader): `TP BS` =
-    this.align(BS div 8)
-    var tmp: `TP BS` = this.ss.`read NAME BS`()
-    bigEndian16(addr(result), addr(tmp))
-
-implWriterBe(Uint, uint, 8)
-implWriterBe(Uint, uint, 16)
-implWriterBe(Uint, uint, 32)
-implWriterBe(Uint, uint, 64)
-
-implWriterBe(Int, int, 8)
-implWriterBe(Int, int, 16)
-implWriterBe(Int, int, 32)
-implWriterBe(Int, int, 64)
+proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter =
+  this.align(sizeof(T))
+  var tmp: T = this.ss.`read NAME BS`()
+  bigEndian16(addr(result), addr(tmp))
