@@ -68,54 +68,55 @@ proc readString*(this: CdrReader): string =
       return ""
     return this.ss.readStr(length)
 
-proc readSequenceLength*(this: CdrReader): int =
+proc sequenceLength*(this: CdrReader): int =
     return int(this.ss.readuint32())
   
-proc readInt8Array*(count: number = this.sequenceLength()): Int8Array =
-    const array = new Int8Array(this.view.buffer, this.view.byteOffset + this.offset, count);
-    this.offset += count;
-    return array;
+proc readInt8Array*(this: CdrReader, count: int = this.sequenceLength()): seq[int8] =
+    result = newSeqOfCap[int8](count)
+    let cnt = this.ss.readData(result.addr, count)
+    if cnt != count:
+      raise newException(CdrError, "error reading int8 array")
   
+proc readUint8Array*(this: CdrReader, count: int = this.sequenceLength()): seq[uint8] =
+    result = newSeqOfCap[uint8](count)
+    let cnt = this.ss.readData(result.addr, count)
+    if cnt != count:
+      raise newException(CdrError, "error reading int8 array")
 
-proc readUint8Array*(count: number = this.sequenceLength()): Uint8Array =
-    const array = new Uint8Array(this.view.buffer, this.view.byteOffset + this.offset, count);
-    this.offset += count;
-    return array;
-  
 
-proc readInt16Array*(count: number = this.sequenceLength()): Int16Array =
+proc readInt16Array*(count: int = this.sequenceLength()): Int16Array =
     return this.typedArray(Int16Array, "getInt16", count);
   
 
-proc readUint16Array*(count: number = this.sequenceLength()): Uint16Array =
+proc readUint16Array*(count: int = this.sequenceLength()): Uint16Array =
     return this.typedArray(Uint16Array, "getUint16", count);
   
 
-proc readInt32Array*(count: number = this.sequenceLength()): Int32Array =
+proc readInt32Array*(count: int = this.sequenceLength()): Int32Array =
     return this.typedArray(Int32Array, "getInt32", count);
   
 
-proc readUint32Array*(count: number = this.sequenceLength()): Uint32Array =
+proc readUint32Array*(count: int = this.sequenceLength()): Uint32Array =
     return this.typedArray(Uint32Array, "getUint32", count);
   
 
-proc readInt64Array*(count: number = this.sequenceLength()): BigInt64Array =
+proc readInt64Array*(count: int = this.sequenceLength()): BigInt64Array =
     return this.typedArray(BigInt64Array, "getBigInt64", count);
   
 
-proc readUint64Array*(count: number = this.sequenceLength()): BigUint64Array =
+proc readUint64Array*(count: int = this.sequenceLength()): BigUint64Array =
     return this.typedArray(BigUint64Array, "getBigUint64", count);
   
 
-proc readFloat32Array*(count: number = this.sequenceLength()): Float32Array =
+proc readFloat32Array*(count: int = this.sequenceLength()): Float32Array =
     return this.typedArray(Float32Array, "getFloat32", count);
   
 
-proc readFloat64Array*(count: number = this.sequenceLength()): Float64Array =
+proc readFloat64Array*(count: int = this.sequenceLength()): Float64Array =
     return this.typedArray(Float64Array, "getFloat64", count);
   
 
-proc readStringArray*(count: number = this.sequenceLength()): string[] =
+proc readStringArray*(count: int = this.sequenceLength()): string[] =
     const output: string[] = [];
     for (let i = 0; i < count; i++) {
       output.push(this.string());
