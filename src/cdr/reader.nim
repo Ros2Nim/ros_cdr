@@ -38,8 +38,15 @@ proc readUint16(ss: Stream): uint16 = cast[uint16](ss.readInt16())
 proc readUint32(ss: Stream): uint32 = cast[uint32](ss.readInt32())
 proc readUint64(ss: Stream): uint64 = cast[uint64](ss.readInt64())
 
+proc align(this: CdrReader, size: int): void =
+    let alignment = (this.ss.getPosition() - 4) mod size
+    echo "set alignment: ", size, " align: ", alignment, " to ", $(size-alignment)
+    if (alignment > 0):
+      this.ss.setPosition(this.ss.getPosition() + size - alignment)
+
 template implReader(NAME, TP, BS: untyped) =
   proc `read NAME BS`*(this: CdrReader): `TP BS` =
+    this.align(BS div 8)
     when system.cpuEndian == littleEndian:
       if this.littleEndian:
         result = this.ss.`read NAME BS`()
@@ -68,6 +75,7 @@ implReader(Float, float, 64)
 
 template implReaderBe(NAME, TP, BS: untyped) =
   proc `read NAME BS Be`*(this: CdrReader): `TP BS` =
+    this.align(BS div 8)
     var tmp: `TP BS` = this.ss.`read NAME BS`()
     bigEndian16(addr(result), addr(tmp))
 
@@ -81,12 +89,22 @@ implReaderBe(Int, int, 16)
 implReaderBe(Int, int, 32)
 implReaderBe(Int, int, 64)
 
+import os
 
 proc readString*(this: CdrReader): string =
-    let length = int(this.ss.readuint32())
-    if length <= 1:
+    echo "readString:pos: ", this.ss.getPosition()
+    let ll = this.readuint32().int
+    echo "LL: ", ll
+    echo "readString:pos: ", this.ss.getPosition()
+    if ll > 100:
+      raise newException(CdrError, "error, len too large: " & $ll)
+    if ll <= 1:
       return ""
-    return this.ss.readStr(length)
+    result = this.ss.readStr(ll-1)
+
+    # this.ss.setPosition(this.ss.getPosition()+1)
+    # if cnt != length+1:
+    #   raise newException(CdrError, "error reading int8 array")
 
 proc sequenceLength*(this: CdrReader): int =
     return int(this.ss.readuint32())

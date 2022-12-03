@@ -41,8 +41,15 @@ suite "CdrReader":
     # time stamp
     check(reader.readuint32() == 1490149580) # uint32 sec // 0x58D1E0CC
     check(reader.readuint32() == 117017840) # uint32 nsec
-    check(reader.readstring() == "base_link") # string frame_id
-    check(reader.readstring() == "radar") # string child_frame_id
+    let xx = reader.readString()
+    echo "xx:len: ", xx.len(), " ", "base_link".len()
+    echo "xx: `", xx, "`"
+    check(xx == "base_link") # string frame_id
+    echo ""
+    let yy = reader.readString()
+    echo "yy:len: ", yy.len(), " ", "radar".len()
+    echo "yy: `", yy, "`"
+    check(yy == "radar") # string child_frame_id
     # geometry_msgs/Transform transform
     # geometry_msgs/Vector3 translation
     check(reader.readfloat64() ~= 3.835) # float64 x
@@ -54,6 +61,6 @@ suite "CdrReader":
     check(reader.readfloat64() ~= 0) # float64 z
     check(reader.readfloat64() ~= 1) # float64 w
 
-    check(reader.getPosition() == tf2_msg_TFMessage.len())
-    check(reader.decodedBytes() == tf2_msg_TFMessage.len)
-    check(reader.byteLength() == tf2_msg_TFMessage.len)
+    check(reader.getPosition() == data.len())
+    check(reader.decodedBytes() == data.len)
+    check(reader.byteLength() == data.len)
