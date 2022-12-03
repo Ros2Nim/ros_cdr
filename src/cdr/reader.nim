@@ -100,10 +100,7 @@ implArrayReader(Int, int, 32)
 implArrayReader(Int, int, 64)
 
 
-proc readStringArray*(count: int = this.sequenceLength()): string[] =
-    const output: string[] = [];
-    for (let i = 0; i < count; i++) {
-      output.push(this.string());
-    
-    return output;
-  }
+proc readStringArray*(this: CdrReader, count: int = this.sequenceLength()): seq[string] =
+    result = newSeqOfCap[string](count)
+    for i in 0 ..< count:
+      result.add(this.readString())
