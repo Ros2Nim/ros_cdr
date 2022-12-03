@@ -7,18 +7,14 @@
 
 import unittest
 import strutils
+import stew/byteutils
 
 import cdr/cdrtypes
 import cdr/reader
 
 # Example tf2_msgs/TFMessage
 const tf2_msg_TFMessage: string =
-  static:
-    let str = "0001000001000000cce0d158f08cf9060a000000626173655f6c696e6b000000060000007261646172000000ae47e17a14ae0e4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f"
-    var data = newString(str.len() div 2)
-    for i in countup(0, str.len()-2, 2):
-      data.add(cast[char](fromHex[uint8](str[i..i+1])))
-    data
+     "0001000001000000cce0d158f08cf9060a000000626173655f6c696e6b000000060000007261646172000000ae47e17a14ae0e4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f"
 
 proc near*[T: SomeFloat](x, y: T, eps: T): bool =
   result = abs(x-y) < eps
@@ -30,7 +26,11 @@ proc `~=` *[T: float32](x, y: T): bool =
 suite "CdrReader":
   test "parses an example tf2_msgs/TFMessage message":
     
-    let reader = newCdrReader(tf2_msg_TFMessage[0..^1])
+    let data = $cast[string](tf2_msg_TFMessage.hexToSeqByte())
+    check tf2_msg_TFMessage == data.toHex().toLowerAscii()
+
+    # echo "tf2_msg_TFMessage: ", toHex(data)
+    let reader = newCdrReader(data)
     check(reader.decodedBytes == 4)
 
     # geometry_msgs/TransformStamped[] transforms
