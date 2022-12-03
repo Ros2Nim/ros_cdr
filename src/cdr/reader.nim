@@ -61,6 +61,21 @@ implReader(Int, int, 16)
 implReader(Int, int, 32)
 implReader(Int, int, 64)
 
+template implReaderBe(NAME, TP, BS: untyped) =
+  proc `read NAME BS`*(this: CdrReader): `TP BS` =
+    var tmp: `TP BS` = this.ss.`read NAME BS`()
+    bigEndian16(addr(result), addr(tmp))
+
+implReaderBe(Uint, uint, 8)
+implReaderBe(Uint, uint, 16)
+implReaderBe(Uint, uint, 32)
+implReaderBe(Uint, uint, 64)
+
+implReaderBe(Int, int, 8)
+implReaderBe(Int, int, 16)
+implReaderBe(Int, int, 32)
+implReaderBe(Int, int, 64)
+
 proc readString*(this: CdrReader): string =
     let length = int(this.ss.readuint32())
     if length <= 1:
