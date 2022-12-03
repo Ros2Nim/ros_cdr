@@ -26,7 +26,7 @@ proc writeBe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
   writeData(s, addr(tmp), sizeof(x))
 
 proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
-  ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+  ## LittleEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
   var tmp: T
   when sizeof(T) == 1:
     tmp = x
@@ -40,3 +40,33 @@ proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
     error("unhandled size")
   writeData(s, addr(tmp), sizeof(x))
 
+proc readBe*[T: SomeInteger|SomeFloat](s: Stream, x: typedesc[T]): T =
+  ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+  var tmp: T
+  writeData(s, addr(tmp), sizeof(x))
+  when sizeof(T) == 1:
+    result = x
+  elif sizeof(T) == 2:
+    bigEndian16(result.addr, tmp.addr)
+  elif sizeof(T) == 4:
+    bigEndian32(result.addr, tmp.addr)
+  elif sizeof(T) == 8:
+    bigEndian32(result.addr, tmp.addr)
+  else:
+    error("unhandled size")
+
+proc readLe*[T: SomeInteger|SomeFloat](s: Stream, x: typedesc[T]): T =
+  ## LittleEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+  var tmp: T
+  writeData(s, addr(tmp), sizeof(x))
+  when sizeof(T) == 1:
+    result = x
+  elif sizeof(T) == 2:
+    littleEndian16(result.addr, tmp.addr)
+  elif sizeof(T) == 4:
+    littleEndian32(result.addr, tmp.addr)
+  elif sizeof(T) == 8:
+    littleEndian32(result.addr, tmp.addr)
+  else:
+    error("unhandled size")
+  
