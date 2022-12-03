@@ -92,19 +92,14 @@ implReaderBe(Int, int, 64)
 import os
 
 proc readString*(this: CdrReader): string =
-    echo "readString:pos: ", this.ss.getPosition()
     let ll = this.readuint32().int
-    echo "LL: ", ll
-    echo "readString:pos: ", this.ss.getPosition()
     if ll > 100:
       raise newException(CdrError, "error, len too large: " & $ll)
     if ll <= 1:
       return ""
     result = this.ss.readStr(ll-1)
-
     # this.ss.setPosition(this.ss.getPosition()+1)
-    # if cnt != length+1:
-    #   raise newException(CdrError, "error reading int8 array")
+    assert this.ss.readChar() == char(0)
 
 proc sequenceLength*(this: CdrReader): int =
     return int(this.ss.readuint32())

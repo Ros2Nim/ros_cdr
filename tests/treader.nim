@@ -42,8 +42,6 @@ suite "CdrReader":
     check(reader.readuint32() == 1490149580) # uint32 sec // 0x58D1E0CC
     check(reader.readuint32() == 117017840) # uint32 nsec
     let xx = reader.readString()
-    echo "xx:len: ", xx.len(), " ", "base_link".len()
-    echo "xx: `", xx, "`"
     check(xx == "base_link") # string frame_id
     echo ""
     let yy = reader.readString()
