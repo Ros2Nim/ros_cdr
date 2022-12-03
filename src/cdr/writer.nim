@@ -37,6 +37,20 @@ proc writeBe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
     error("unhandled size")
   writeData(s, addr(tmp), sizeof(x))
 
+proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
+  ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+  var tmp: T
+  when sizeof(T) == 1:
+    tmp = x
+  elif sizeof(T) == 2:
+    bigEndian16(tmp.addr, x.unsafeAddr)
+  elif sizeof(T) == 4:
+    bigEndian32(tmp.addr, x.unsafeAddr)
+  elif sizeof(T) == 8:
+    bigEndian64(tmp.addr, x.unsafeAddr)
+  else:
+    error("unhandled size")
+  writeData(s, addr(tmp), sizeof(x))
 
 proc data(this: CdrWriter): string =
   return this.ss.data
@@ -64,7 +78,6 @@ proc initCdrWriter*(opts: CdrWriterOpts): CdrWriter =
     result.littleEndian = kind in [CDR_LE, PL_CDR_LE]
 
     # Write the Representation Id and Offset fields
-    result.ss.resizeIfNeeded(4)
     result.ss.write(0) # Upper bits of EncapsulationKind, unused
     result.ss.write(kind)
 
@@ -79,29 +92,39 @@ proc align(this: CdrWriter, size: int, bytesToWrite: int = size): void =
     let padding = if alignment > 0: size - alignment else: 0
     echo "set alignment: ", size, " align: ", alignment, " to ", $(size-alignment)
 
-    this.ss.resizeIfNeeded(padding + bytesToWrite);
     # // Write padding bytes
     for i in 0 ..< padding:
       this.ss.write(0'u8)
 
-proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter =
+proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter {.discardable.} =
   this.align(sizeof(T))
+  result = this
+  if this.littleEndian:
+    this.ss.writeLe(val)
+  else:
+    this.ss.writeBe(val)
 
-  when system.cpuEndian == littleEndian:
-    if this.littleEndian:
-      result = this.ss.write(val)
-    else:
-      var tmp: T
-      swapEndian(addr(tmp), addr(val))
-      this.ss.write(tmp)
-  else: # bigendian
-    if this.littleEndian:
-      var tmp: T
-      swapEndian(addr(tmp), addr(val))
-      this.ss.write(tmp)
-    else:
-      result = this.ss.write(val)
-
-proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter =
+proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter {.discardable.} =
   this.align(sizeof(T))
   this.ss.writeBe(val)
+
+proc write*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
+  let strlen = value.len
+  this.write(uint32(strlen))
+  this.ss.write(uint8(0)) # add null terminator
+  return this
+
+proc sequenceLength(this: CdrWriter, value: int): CdrWriter {.discardable.} =
+  return this.write(uint32(value))
+
+proc write*[T: SomeInteger|SomeFloat|string](
+    this: CdrWriter,
+    value: openArray[T],
+    writeLength: bool = false
+): CdrWriter {.discardable.} =
+    if writeLength == true:
+      this.sequenceLength(value.len)
+    this.ss.resizeIfNeeded(value.len)
+    for v in value:
+      this.write(v)
+    return this
