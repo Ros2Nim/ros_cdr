@@ -52,7 +52,7 @@ suite "CdrReader":
     check(reader.readfloat64() ~= 0) # float64 z
     check(reader.readfloat64() ~= 1) # float64 w
 
-    check(reader.offset == tf2_msg_TFMessage.len())
+    check(reader.getPosition() == tf2_msg_TFMessage.len())
     check(reader.kind == EncapsulationKind.CDR_LE)
     check(reader.decodedBytes() == tf2_msg_TFMessage.len)
     check(reader.byteLength() == tf2_msg_TFMessage.len)

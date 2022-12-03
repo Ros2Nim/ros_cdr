@@ -6,8 +6,12 @@ import cdrtypes
 type
   CdrReader* = ref object
     ss*: StringStream
+    kind*: EncapsulationKind
     littleEndian*: bool
     hostLittleEndian*: bool
+
+proc getPosition*(this: CdrReader): int =
+  return this.ss.getPosition()
 
 proc decodedBytes*(this: CdrReader): int =
   return this.ss.getPosition()
