@@ -16,18 +16,17 @@ proc byteLength*(this: CdrReader): int =
   return this.ss.data.len()
 
 
-proc init*(kd: typedesc[CdrReader], data: string): CdrReader =
+proc newCdrReader*(data: string): CdrReader =
   new result
-  if data.byteLength < 4:
+  if data.len < 4:
     raise newException(CdrError,
       "Invalid CDR data size " & $data.len() & ", minimum size is at least 4-bytes",
     )
-  result.view = newStringStream(data)
-  let kind = result.view.readInt8().EncapsulationKind
+  result.ss = newStringStream(data)
+  let kind = result.ss.readInt8().EncapsulationKind
 
   result.littleEndian = kind == CDR_LE or kind == PL_CDR_LE
-  result.view.setPosition(4)
-
+  result.ss.setPosition(4)
 
 proc swapEndian8(x, y: ptr) = discard
 proc readInt8(ss: Stream): int8 = cast[int8](ss.readChar())
