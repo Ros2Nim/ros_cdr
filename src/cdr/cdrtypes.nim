@@ -43,7 +43,7 @@ proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
 proc readBe*[T: SomeInteger|SomeFloat](s: Stream, x: typedesc[T]): T =
   ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
   var tmp: T
-  writeData(s, addr(tmp), sizeof(x))
+  readData(s, addr(tmp), sizeof(x))
   when sizeof(T) == 1:
     result = x
   elif sizeof(T) == 2:
@@ -58,7 +58,7 @@ proc readBe*[T: SomeInteger|SomeFloat](s: Stream, x: typedesc[T]): T =
 proc readLe*[T: SomeInteger|SomeFloat](s: Stream, x: typedesc[T]): T =
   ## LittleEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
   var tmp: T
-  writeData(s, addr(tmp), sizeof(x))
+  readData(s, addr(tmp), sizeof(x))
   when sizeof(T) == 1:
     result = x
   elif sizeof(T) == 2:
