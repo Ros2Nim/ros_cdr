@@ -32,12 +32,14 @@ suite "CdrReader":
     # echo "tf2_msg_TFMessage: ", toHex(data)
     let reader = newCdrReader(data)
     check(reader.decodedBytes == 4)
+    check(reader.kind == EncapsulationKind.CDR_LE)
 
+    # 00,01,00,00_01,00,00,00_cc,e0,d1,58_f08cf9060a000000626173655f6c696e6b000000060000007261646172000000ae47e17a14ae0e4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f03f
     # geometry_msgs/TransformStamped[] transforms
     check(reader.sequenceLength() == 1)
     # std_msgs/Header header
     # time stamp
-    check(reader.readuint32() == 1490149580) # uint32 sec
+    check(reader.readuint32() == 1490149580) # uint32 sec // 0x58D1E0CC
     check(reader.readuint32() == 117017840) # uint32 nsec
     check(reader.readstring() == "base_link") # string frame_id
     check(reader.readstring() == "radar") # string child_frame_id
@@ -53,6 +55,5 @@ suite "CdrReader":
     check(reader.readfloat64() ~= 1) # float64 w
 
     check(reader.getPosition() == tf2_msg_TFMessage.len())
-    check(reader.kind == EncapsulationKind.CDR_LE)
     check(reader.decodedBytes() == tf2_msg_TFMessage.len)
     check(reader.byteLength() == tf2_msg_TFMessage.len)

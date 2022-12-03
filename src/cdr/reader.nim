@@ -26,9 +26,11 @@ proc newCdrReader*(data: string): CdrReader =
       "Invalid CDR data size " & $data.len() & ", minimum size is at least 4-bytes",
     )
   result.ss = newStringStream(data)
-  let kind = result.ss.readInt8().EncapsulationKind
-
-  result.littleEndian = kind == CDR_LE or kind == PL_CDR_LE
+  result.ss.setPosition(1)
+  let xx = result.ss.readUint8()
+  echo "KIND: ", xx
+  result.kind = xx.EncapsulationKind
+  result.littleEndian = result.kind in [CDR_LE, PL_CDR_LE]
   result.ss.setPosition(4)
 
 proc swapEndian8(x, y: ptr) = discard
