@@ -1,3 +1,4 @@
+import std/[endians, streams]
 
 type
   EncapsulationKind* = enum
@@ -8,3 +9,34 @@ type
 
 type
   CdrError* = object of ValueError
+
+proc writeBe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
+  ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+  var tmp: T
+  when sizeof(T) == 1:
+    tmp = x
+  elif sizeof(T) == 2:
+    bigEndian16(tmp.addr, x.unsafeAddr)
+  elif sizeof(T) == 4:
+    bigEndian32(tmp.addr, x.unsafeAddr)
+  elif sizeof(T) == 8:
+    bigEndian64(tmp.addr, x.unsafeAddr)
+  else:
+    error("unhandled size")
+  writeData(s, addr(tmp), sizeof(x))
+
+proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
+  ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+  var tmp: T
+  when sizeof(T) == 1:
+    tmp = x
+  elif sizeof(T) == 2:
+    bigEndian16(tmp.addr, x.unsafeAddr)
+  elif sizeof(T) == 4:
+    bigEndian32(tmp.addr, x.unsafeAddr)
+  elif sizeof(T) == 8:
+    bigEndian64(tmp.addr, x.unsafeAddr)
+  else:
+    error("unhandled size")
+  writeData(s, addr(tmp), sizeof(x))
+
