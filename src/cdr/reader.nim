@@ -37,7 +37,7 @@ proc readUint32(ss: Stream): uint32 = cast[uint32](ss.readInt32())
 proc readUint64(ss: Stream): uint64 = cast[uint64](ss.readInt64())
 
 template implReader(NAME, TP, BS: untyped) =
-  proc `read NAME`*(this: CdrReader): `TP BS` =
+  proc `read NAME BS`*(this: CdrReader): `TP BS` =
     when system.cpuEndian == littleEndian:
       if this.littleEndian:
         result = this.ss.`read NAME BS`()
@@ -61,7 +61,6 @@ implReader(Int, int, 16)
 implReader(Int, int, 32)
 implReader(Int, int, 64)
 
-
 proc readString*(this: CdrReader): string =
     let length = int(this.ss.readuint32())
     if length <= 1:
@@ -72,49 +71,34 @@ proc sequenceLength*(this: CdrReader): int =
     return int(this.ss.readuint32())
   
 proc readInt8Array*(this: CdrReader, count: int = this.sequenceLength()): seq[int8] =
-    result = newSeqOfCap[int8](count)
+    result = newSeq[int8](count)
     let cnt = this.ss.readData(result.addr, count)
     if cnt != count:
       raise newException(CdrError, "error reading int8 array")
   
 proc readUint8Array*(this: CdrReader, count: int = this.sequenceLength()): seq[uint8] =
-    result = newSeqOfCap[uint8](count)
+    result = newSeq[uint8](count)
     let cnt = this.ss.readData(result.addr, count)
     if cnt != count:
       raise newException(CdrError, "error reading int8 array")
 
 
-proc readInt16Array*(count: int = this.sequenceLength()): Int16Array =
-    return this.typedArray(Int16Array, "getInt16", count);
-  
+template implArrayReader(NAME, TP, BS: untyped) =
+  proc `read NAME Array`*(this: CdrReader, count: int = this.sequenceLength()): seq[`TP BS`] =
+    result = newSeqOfCap[`TP BS`](count)
+    for i in 0 ..< count:
+      result.add(this.ss.`read TP BS`())
 
-proc readUint16Array*(count: int = this.sequenceLength()): Uint16Array =
-    return this.typedArray(Uint16Array, "getUint16", count);
-  
+implArrayReader(Uint, uint, 8)
+implArrayReader(Uint, uint, 16)
+implArrayReader(Uint, uint, 32)
+implArrayReader(Uint, uint, 64)
 
-proc readInt32Array*(count: int = this.sequenceLength()): Int32Array =
-    return this.typedArray(Int32Array, "getInt32", count);
-  
+implArrayReader(Int, int, 8)
+implArrayReader(Int, int, 16)
+implArrayReader(Int, int, 32)
+implArrayReader(Int, int, 64)
 
-proc readUint32Array*(count: int = this.sequenceLength()): Uint32Array =
-    return this.typedArray(Uint32Array, "getUint32", count);
-  
-
-proc readInt64Array*(count: int = this.sequenceLength()): BigInt64Array =
-    return this.typedArray(BigInt64Array, "getBigInt64", count);
-  
-
-proc readUint64Array*(count: int = this.sequenceLength()): BigUint64Array =
-    return this.typedArray(BigUint64Array, "getBigUint64", count);
-  
-
-proc readFloat32Array*(count: int = this.sequenceLength()): Float32Array =
-    return this.typedArray(Float32Array, "getFloat32", count);
-  
-
-proc readFloat64Array*(count: int = this.sequenceLength()): Float64Array =
-    return this.typedArray(Float64Array, "getFloat64", count);
-  
 
 proc readStringArray*(count: int = this.sequenceLength()): string[] =
     const output: string[] = [];
