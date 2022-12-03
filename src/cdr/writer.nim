@@ -90,16 +90,18 @@ proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter =
 
   when system.cpuEndian == littleEndian:
     if this.littleEndian:
-      result = this.ss.`read NAME BS`()
+      result = this.ss.write(val)
     else:
-      `swapEndian BS`(addr(result), addr(tmp))
-      `TP BS` = this.ss.`write`(tmp)
+      var tmp: T
+      swapEndian(addr(tmp), addr(val))
+      this.ss.write(tmp)
   else: # bigendian
     if this.littleEndian:
-      var tmp: `TP BS` = this.ss.`read NAME BS`()
-      `swapEndian BS`(addr(result), addr(tmp))
+      var tmp: T
+      swapEndian(addr(tmp), addr(val))
+      this.ss.write(tmp)
     else:
-      result = this.ss.`read NAME BS`()
+      result = this.ss.write(val)
 
 proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter =
   this.align(sizeof(T))
