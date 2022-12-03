@@ -39,8 +39,8 @@ suite "CdrReader":
     check(reader.sequenceLength() == 1)
     # std_msgs/Header header
     # time stamp
-    check(reader.readuint32() == 1490149580) # uint32 sec // 0x58D1E0CC
-    check(reader.readuint32() == 117017840) # uint32 nsec
+    check(reader.read(uint32) == 1490149580) # uint32 sec // 0x58D1E0CC
+    check(reader.read(uint32) == 117017840) # uint32 nsec
     let xx = reader.readString()
     check(xx == "base_link") # string frame_id
     echo ""
@@ -50,14 +50,14 @@ suite "CdrReader":
     check(yy == "radar") # string child_frame_id
     # geometry_msgs/Transform transform
     # geometry_msgs/Vector3 translation
-    check(reader.readfloat64() ~= 3.835) # float64 x
-    check(reader.readfloat64() ~= 0) # float64 y
-    check(reader.readfloat64() ~= 0) # float64 z
+    check(reader.read(float64) ~= 3.835) # float64 x
+    check(reader.read(float64) ~= 0) # float64 y
+    check(reader.read(float64) ~= 0) # float64 z
     # geometry_msgs/Quaternion rotation
-    check(reader.readfloat64() ~= 0) # float64 x
-    check(reader.readfloat64() ~= 0) # float64 y
-    check(reader.readfloat64() ~= 0) # float64 z
-    check(reader.readfloat64() ~= 1) # float64 w
+    check(reader.read(float64) ~= 0) # float64 x
+    check(reader.read(float64) ~= 0) # float64 y
+    check(reader.read(float64) ~= 0) # float64 z
+    check(reader.read(float64) ~= 1) # float64 w
 
     check(reader.getPosition() == data.len())
     check(reader.decodedBytes() == data.len)

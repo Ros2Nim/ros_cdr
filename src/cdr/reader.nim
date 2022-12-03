@@ -39,8 +39,6 @@ proc align(this: CdrReader, size: int): void =
 
 proc read*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
   this.align(sizeof(tp))
-  this.ss.read(result)
-
   if this.littleEndian:
     result = this.ss.readLe(tp)
   else:
@@ -48,8 +46,6 @@ proc read*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
 
 proc readBe*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
   this.align(sizeof(tp))
-  this.ss.read(result)
-
   result = this.ss.readBe(tp)
 
 import os
