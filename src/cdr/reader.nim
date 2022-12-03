@@ -27,9 +27,7 @@ proc newCdrReader*(data: string): CdrReader =
     )
   result.ss = newStringStream(data)
   result.ss.setPosition(1)
-  let xx = result.ss.readUint8()
-  echo "KIND: ", xx
-  result.kind = xx.EncapsulationKind
+  result.kind = result.ss.readUint8().EncapsulationKind
   result.littleEndian = result.kind in [CDR_LE, PL_CDR_LE]
   result.ss.setPosition(4)
 
