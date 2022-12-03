@@ -31,68 +31,31 @@ proc newCdrReader*(data: string): CdrReader =
   result.littleEndian = result.kind in [CDR_LE, PL_CDR_LE]
   result.ss.setPosition(4)
 
-proc swapEndian8(x, y: ptr) = discard
-proc readInt8(ss: Stream): int8 = cast[int8](ss.readChar())
-proc readUint8(ss: Stream): uint8 = cast[uint8](ss.readChar())
-proc readUint16(ss: Stream): uint16 = cast[uint16](ss.readInt16())
-proc readUint32(ss: Stream): uint32 = cast[uint32](ss.readInt32())
-proc readUint64(ss: Stream): uint64 = cast[uint64](ss.readInt64())
-
 proc align(this: CdrReader, size: int): void =
     let alignment = (this.ss.getPosition() - 4) mod size
     echo "set alignment: ", size, " align: ", alignment, " to ", $(size-alignment)
     if (alignment > 0):
       this.ss.setPosition(this.ss.getPosition() + size - alignment)
 
-template implReader(NAME, TP, BS: untyped) =
-  proc `read NAME BS`*(this: CdrReader): `TP BS` =
-    this.align(BS div 8)
-    when system.cpuEndian == littleEndian:
-      if this.littleEndian:
-        result = this.ss.`read NAME BS`()
-      else:
-        var tmp: `TP BS` = this.ss.`read NAME BS`()
-        `swapEndian BS`(addr(result), addr(tmp))
-    else: # bigendian
-      if this.littleEndian:
-        var tmp: `TP BS` = this.ss.`read NAME BS`()
-        `swapEndian BS`(addr(result), addr(tmp))
-      else:
-        result = this.ss.`read NAME BS`()
+proc read*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
+  this.align(sizeof(tp))
+  this.ss.read(result)
 
-implReader(Uint, uint, 8)
-implReader(Uint, uint, 16)
-implReader(Uint, uint, 32)
-implReader(Uint, uint, 64)
+  if this.littleEndian:
+    result = this.ss.readLe(tp)
+  else:
+    result = this.ss.readBe(tp)
 
-implReader(Int, int, 8)
-implReader(Int, int, 16)
-implReader(Int, int, 32)
-implReader(Int, int, 64)
+proc readBe*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
+  this.align(sizeof(tp))
+  this.ss.read(result)
 
-implReader(Float, float, 32)
-implReader(Float, float, 64)
-
-template implReaderBe(NAME, TP, BS: untyped) =
-  proc `read NAME BS Be`*(this: CdrReader): `TP BS` =
-    this.align(BS div 8)
-    var tmp: `TP BS` = this.ss.`read NAME BS`()
-    bigEndian16(addr(result), addr(tmp))
-
-implReaderBe(Uint, uint, 8)
-implReaderBe(Uint, uint, 16)
-implReaderBe(Uint, uint, 32)
-implReaderBe(Uint, uint, 64)
-
-implReaderBe(Int, int, 8)
-implReaderBe(Int, int, 16)
-implReaderBe(Int, int, 32)
-implReaderBe(Int, int, 64)
+  result = this.ss.readBe(tp)
 
 import os
 
 proc readString*(this: CdrReader): string =
-    let ll = this.readuint32().int
+    let ll = this.read(uint32).int
     if ll > 100:
       raise newException(CdrError, "error, len too large: " & $ll)
     if ll <= 1:
@@ -104,34 +67,19 @@ proc readString*(this: CdrReader): string =
 proc sequenceLength*(this: CdrReader): int =
     return int(this.ss.readuint32())
   
-proc readInt8Array*(this: CdrReader, count: int = this.sequenceLength()): seq[int8] =
+proc readArray*[T: SomeInteger|SomeFloat](
+    this: CdrReader,
+    count: int = this.sequenceLength()
+): seq[T] =
+  when sizeof(T) == 1:
     result = newSeq[int8](count)
     let cnt = this.ss.readData(result.addr, count)
     if cnt != count:
       raise newException(CdrError, "error reading int8 array")
-  
-proc readUint8Array*(this: CdrReader, count: int = this.sequenceLength()): seq[uint8] =
-    result = newSeq[uint8](count)
-    let cnt = this.ss.readData(result.addr, count)
-    if cnt != count:
-      raise newException(CdrError, "error reading int8 array")
-
-
-template implArrayReader(NAME, TP, BS: untyped) =
-  proc `read NAME Array`*(this: CdrReader, count: int = this.sequenceLength()): seq[`TP BS`] =
-    result = newSeqOfCap[`TP BS`](count)
+  else:
+    result = newSeqOfCap[T](count)
     for i in 0 ..< count:
-      result.add(this.ss.`read TP BS`())
-
-implArrayReader(Uint, uint, 8)
-implArrayReader(Uint, uint, 16)
-implArrayReader(Uint, uint, 32)
-implArrayReader(Uint, uint, 64)
-
-implArrayReader(Int, int, 8)
-implArrayReader(Int, int, 16)
-implArrayReader(Int, int, 32)
-implArrayReader(Int, int, 64)
+      result.add(this.ss.read(T))
 
 proc readStringArray*(this: CdrReader, count: int = this.sequenceLength()): seq[string] =
     result = newSeqOfCap[string](count)
