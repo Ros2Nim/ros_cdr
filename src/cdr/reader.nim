@@ -100,12 +100,7 @@ proc readSeq*[T: SomeInteger|SomeFloat](
     this: CdrReader,
     tp: typedesc[T],
 ): seq[T] =
-  echo "READ SEQ: ", this.getPosition
-  echo "READ HEX: ", this.ss.data[this.getPosition..^1].toHex
   let count = this.sequenceLength()
-  echo "READ_SEQ:COUNT: ", count
-  echo "READ_SEQ:POS: ", this.getPosition()
-  echo "READ HEX:POS: ", this.ss.data[this.getPosition..^1].toHex
   readSeq(this, tp, count)
 
 proc readStrSeq*(

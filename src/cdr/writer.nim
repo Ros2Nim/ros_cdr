@@ -100,7 +100,7 @@ proc sequenceLength*(this: CdrWriter, value: int): CdrWriter {.discardable.} =
 proc writeArray*[T: SomeInteger|SomeFloat|string](
     this: CdrWriter,
     value: openArray[T],
-    writeLength: bool = false
+    writeLength: bool = true
 ): CdrWriter {.discardable.} =
     echo "writeArray: TP: ", $(T), " len: ", value.len
     if writeLength == true:
