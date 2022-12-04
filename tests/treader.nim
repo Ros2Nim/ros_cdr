@@ -143,8 +143,8 @@ suite "CdrReader":
 
   test "read ints ":
     testInts([-128.int8, 127, 3])
-  # test "read u8 ":
-  #   testInts([0.uint8, 255, 3])
+  test "read u8 ":
+    testInts([0.uint8, 255, 3])
   test "read i16 ":
     testInts([-32768.int16, 32767, -3])
   # test "read u16 ":

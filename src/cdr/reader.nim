@@ -90,21 +90,22 @@ proc readSeq*[T: SomeInteger|SomeFloat](
     count: int
 ): seq[T] =
   assert count <= 10_000, "count too large: " & $count
-  when sizeof(T) == 1:
-    result = newSeq[T](count)
-    let cnt = this.ss.readData(result.addr, count)
-    if cnt != count:
-      raise newException(CdrError, "error reading array, len read: " & $cnt & " // " & $count)
-  else:
-    result = newSeqOfCap[T](count)
-    for i in 0 ..< count:
-      result.add(this.read(tp))
+  result = newSeqOfCap[T](count)
+  for i in 0 ..< count:
+    result.add(this.read(tp))
+
+import stew/byteutils
 
 proc readSeq*[T: SomeInteger|SomeFloat](
     this: CdrReader,
     tp: typedesc[T],
 ): seq[T] =
+  echo "READ SEQ: ", this.getPosition
+  echo "READ HEX: ", this.ss.data[this.getPosition..^1].toHex
   let count = this.sequenceLength()
+  echo "READ_SEQ:COUNT: ", count
+  echo "READ_SEQ:POS: ", this.getPosition()
+  echo "READ HEX:POS: ", this.ss.data[this.getPosition..^1].toHex
   readSeq(this, tp, count)
 
 proc readStrSeq*(

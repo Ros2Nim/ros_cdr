@@ -102,10 +102,9 @@ proc writeArray*[T: SomeInteger|SomeFloat|string](
     value: openArray[T],
     writeLength: bool = false
 ): CdrWriter {.discardable.} =
-    echo "writeArray: TP: ", $(T)
+    echo "writeArray: TP: ", $(T), " len: ", value.len
     if writeLength == true:
       this.sequenceLength(value.len)
-    this.ss.resizeIfNeeded(value.len)
     for v in value:
       this.write(v)
     return this

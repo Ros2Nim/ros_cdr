@@ -104,6 +104,32 @@ suite "CdrWriter":
     check(reader.readStr() == "abc");
     check(reader.sequenceLength() == 42);
   
+  test "round trip basic array type":
+    let writer = newCdrWriter()
+    writer.writeArray([-128'i8, 127, 3], true)
+
+    echo "round trips: ", writer.data.len, " hex: ", writer.data.toHex
+    let reader = newCdrReader(writer.data)
+    let res = reader.readSeq(int8)
+    check res.len == 3
+    check(res == [-128'i8, 127, 3])
+
+  # test "round trips all array types":
+  #   let writer = newCdrWriter()
+  #   writer.writeArray([-128'i8, 127, 3])
+  #   writer.writeArray([0'u8, 255, 3])
+  #   writer.writeArray([-32768'i16, 32767, -3])
+  #   writer.writeArray([0'u16, 65535, 3])
+  #   writer.writeArray([-2147483648'i32, 2147483647, 3])
+  #   writer.writeArray([0'u32, 4294967295'u32, 3])
+  #   writer.writeArray([-9223372036854775808'i64, 9223372036854775807'i64, 3])
+  #   writer.writeArray([0'u64, 18446744073709551615'u64, 3])
+
+  #   echo "round trips: ", writer.data.toHex
+  #   let reader = newCdrReader(writer.data)
+  #   check(reader.readSeq(int8) == [-128'i8, 127, 3])
+  #   check(reader.readSeq(uint8) == [0'u8, 255, 3])
+
   test "writes parameter lists":
     let writer = newCdrWriter(kind= some EncapsulationKind.PL_CDR_LE)
     writer.write(uint8(0x42))

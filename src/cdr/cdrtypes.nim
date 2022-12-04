@@ -40,8 +40,8 @@ proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
     error("unhandled size")
   writeData(s, addr(tmp), sizeof(x))
 
-proc readBe*[T: SomeInteger|SomeFloat](ss: Stream, x: typedesc[T]): T =
-  ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+proc readBe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
+  ## BigEndian version of generic read procedure. 
   var tmp: T
   assert ss.readData(addr(tmp), sizeof(x)) == sizeof(x)
   when sizeof(T) == 1:
@@ -55,10 +55,13 @@ proc readBe*[T: SomeInteger|SomeFloat](ss: Stream, x: typedesc[T]): T =
   else:
     error("unhandled size")
 
-proc readLe*[T: SomeInteger|SomeFloat](ss: Stream, x: typedesc[T]): T =
-  ## LittleEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
+proc readLe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
+  ## LittleEndian version of generic read procedure. 
   var tmp: T
-  assert ss.readData(addr(tmp), sizeof(x)) == sizeof(x)
+  let cnt = ss.readData(addr(tmp), sizeof(x))
+  echo "read: data: ", ss.data.len, " pos: ", ss.getPosition
+  echo "read: cnt: ", cnt, " sizeof: ", sizeof(x)
+  assert cnt == sizeof(x)
   when sizeof(T) == 1:
     result = tmp
   elif sizeof(T) == 2:
