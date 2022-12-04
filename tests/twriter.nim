@@ -9,9 +9,9 @@ import unittest
 import strutils
 import stew/byteutils
 
-import cdr/cdrtypes
-import cdr/writer
-import cdr/reader
+import ros_cdr/cdrtypes
+import ros_cdr/writer
+import ros_cdr/reader
 
 # Example tf2_msgs/TFMessage
 const tf2_msg_TFMessage: string =
