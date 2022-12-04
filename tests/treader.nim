@@ -11,6 +11,7 @@ import stew/byteutils
 
 import cdr/cdrtypes
 import cdr/reader
+import cdr/writer
 
 # Example tf2_msgs/TFMessage
 const tf2_msg_TFMessage: string =
@@ -130,3 +131,22 @@ suite "CdrReader":
     reader.seek(-8);
     check(reader.read(float64) ~= 3.835)
     check(reader.read(float64) ~= 0)
+
+  template testInts(expected: untyped) =
+    let writer = newCdrWriter()
+    writer.writeArray(expected)
+
+    let reader = newCdrReader(writer.data)
+    let vals = reader.readSeq(typeof(expected[0]),reader.sequenceLength())
+    check vals == expected
+
+  # for name, expected in fieldPairs((
+  #                   [-128.int8, 127, 3],
+  #                   [0.uint8, 255, 3],
+  #                   [-32768.int16, 32767, -3],
+  #                   [0.uint16, 65535, 3],
+  #                   [-2147483648.int32, 2147483647, 3],
+  #                   [0.uint32, 4294967295.uint32, 3]
+  #                 )):
+  #   test "read ints":
+  #     testInts(expected)
