@@ -59,8 +59,6 @@ proc readLe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
   ## LittleEndian version of generic read procedure. 
   var tmp: T
   let cnt = ss.readData(addr(tmp), sizeof(x))
-  echo "read: data: ", ss.data.len, " pos: ", ss.getPosition
-  echo "read: cnt: ", cnt, " sizeof: ", sizeof(x)
   assert cnt == sizeof(x)
   when sizeof(T) == 1:
     result = tmp

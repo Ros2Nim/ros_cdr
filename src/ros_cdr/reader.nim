@@ -115,5 +115,4 @@ proc readStrSeq*(
     this: CdrReader,
 ): seq[string] =
   let count = this.sequenceLength()
-  echo "readStrSeq:count: ", count
   readStrSeq(this, count)

@@ -51,7 +51,6 @@ proc newCdrWriter*(
   let kind = if kind.isSome: kind.get()
            else: EncapsulationKind.CDR_LE
   result.littleEndian = kind in [CDR_LE, PL_CDR_LE]
-  echo "kind: ", kind
 
   # Write the Representation Id and Offset fields
   result.ss.write(0'u8) # Upper bits of EncapsulationKind, unused
@@ -69,7 +68,6 @@ proc align*(this: CdrWriter, size: int, bytesToWrite: int = size): void =
 
   let alignment = (this.ss.getPosition() - 4) mod size
   let padding = if alignment > 0: size - alignment else: 0
-  echo "set alignment: ", size, " align: ", alignment, " to ", $(size-alignment)
 
   # // Write padding bytes
   for i in 0 ..< padding:
@@ -102,7 +100,6 @@ proc writeArray*[T: SomeInteger|SomeFloat|string](
     value: openArray[T],
     writeLength: bool = true
 ): CdrWriter {.discardable.} =
-    echo "writeArray: TP: ", $(T), " len: ", value.len
     if writeLength == true:
       this.sequenceLength(value.len)
     for v in value:
