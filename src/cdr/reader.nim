@@ -49,7 +49,7 @@ proc readBe*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
 
 import os
 
-proc readString*(this: CdrReader): string =
+proc readStr*(this: CdrReader): string =
     let ll = this.read(uint32).int
     if ll > 100:
       raise newException(CdrError, "error, len too large: " & $ll)
@@ -62,9 +62,9 @@ proc readString*(this: CdrReader): string =
 proc sequenceLength*(this: CdrReader): int =
     return int(this.ss.readuint32())
   
-proc readArray*[T: SomeInteger|SomeFloat](
+proc readSeq*[T: SomeInteger|SomeFloat](
     this: CdrReader,
-    count: int = this.sequenceLength()
+    tp: typedesc[T]
 ): seq[T] =
   when sizeof(T) == 1:
     result = newSeq[int8](count)
@@ -76,7 +76,7 @@ proc readArray*[T: SomeInteger|SomeFloat](
     for i in 0 ..< count:
       result.add(this.ss.read(T))
 
-proc readStringArray*(this: CdrReader, count: int = this.sequenceLength()): seq[string] =
+proc readStringSeq*(this: CdrReader, count: int = this.sequenceLength()): seq[string] =
     result = newSeqOfCap[string](count)
     for i in 0 ..< count:
-      result.add(this.readString())
+      result.add(this.readStr())

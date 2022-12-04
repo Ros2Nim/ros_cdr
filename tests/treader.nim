@@ -39,7 +39,7 @@ suite "CdrReader":
     check(reader.sequenceLength() == 1)
     # std_msgs/Header header
     # time stamp
-    check(reader.read(uint32) == 1490149580) # uint32 sec // 0x58D1E0CC
+    check(reader.read(uint32) == 1490149580) # uint32 sec # 0x58D1E0CC
     check(reader.read(uint32) == 117017840) # uint32 nsec
     let xx = reader.readString()
     check(xx == "base_link") # string frame_id
@@ -62,3 +62,44 @@ suite "CdrReader":
     check(reader.getPosition() == data.len())
     check(reader.decodedBytes() == data.len)
     check(reader.byteLength() == data.len)
+
+  test "parses an example rcl_interfaces/ParameterEvent":
+    
+    let datastr = "00010000a9b71561a570ea01110000002f5f726f7332636c695f33373833363300000000010000000d0000007573655f73696d5f74696d650001000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000"
+    let data = $cast[string](datastr.hexToSeqByte())
+    check datastr == data.toHex().toLowerAscii()
+
+    # echo "tf2_msg_TFMessage: ", toHex(data)
+    let reader = newCdrReader(data)
+    check(reader.decodedBytes == 4)
+    check(reader.kind == EncapsulationKind.CDR_LE)
+
+    # builtin_interfaces/Time stamp
+    check(reader.read(uint32) == 1628813225) # uint32 sec
+    check(reader.read(uint32) == 32141477) # uint32 nsec
+    # string node
+    check(reader.readStr == "/_ros2cli_378363")
+
+    # Parameter[] new_parameters
+    check(reader.sequenceLength() == 1)
+    check(reader.readStr() == "use_sim_time") # string name
+    # ParameterValue value
+    check(reader.read(uint8) == 1) # uint8 type
+    check(reader.read(int8) == 0) # bool bool_value
+    check(reader.read(int64) == 0) # int64 integer_value
+    check(reader.read(float64) == 0) # float64 double_value
+    check(reader.readStr() == "") # string string_value
+
+    check(reader.readSeq(int8) == newSeq int8) # byte[] byte_array_value
+    check(reader.readSeq(uint8) == newSeq uint8) # bool[] bool_array_value
+    check(reader.readSeq(int64) == newSeq int64) # int64[] integer_array_value
+    check(reader.readSeq(float64) == newSeq float64) # float64[] double_array_value
+    check(reader.readStringSeq() == newSeq string) # string[] string_array_value
+
+    # Parameter[] changed_parameters
+    check(reader.sequenceLength() == 0)
+
+    # Parameter[] deleted_parameters
+    check(reader.sequenceLength() == 0)
+
+    check(reader.offset == data.length)
