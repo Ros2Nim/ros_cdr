@@ -2,3 +2,4 @@ src/cdr/writer.nim
 src/cdr/writer
 tests/twriter
 src/cdr/cdrtypes
+tests/treader
