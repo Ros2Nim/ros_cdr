@@ -88,18 +88,18 @@ suite "CdrWriter":
     check(data.len == 80);
 
     let reader = newCdrReader(data)
-    check(reader.read(int8) == -1);
-    check(reader.read(uint8) == 2);
-    check(reader.read(int16) == -300);
-    check(reader.read(uint16) == 400);
-    check(reader.read(int32) == -500_000);
-    check(reader.read(uint32) == 600_000);
-    check(reader.read(int64) == -7_000_000_001);
-    check(reader.read(uint64) == 8_000_000_003);
-    check(reader.readBe(uint16) == 0x1234);
-    check(reader.readBe(uint32) == 0x12345678);
-    check(reader.readBe(uint64) == 0x123456789abcdef0);
-    check(reader.read(float32) ~= -9.14);
-    check(reader.read(float64) ~= 1.7976931348623158e100);
+    check(reader.read(int8) == -1'i8);
+    check(reader.read(uint8) == 2'u8);
+    check(reader.read(int16) == -300'i16);
+    check(reader.read(uint16) == 400'u16);
+    check(reader.read(int32) == -500_000'i32);
+    check(reader.read(uint32) == 600_000'u32);
+    check(reader.read(int64) == -7_000_000_001'i64);
+    check(reader.read(uint64) == 8_000_000_003'u64);
+    check(reader.readBe(uint16) == 0x1234'u16);
+    check(reader.readBe(uint32) == 0x12345678'u32);
+    check(reader.readBe(uint64) == 0x123456789abcdef0'u64);
+    check(reader.read(float32) ~= -9.14'f32);
+    check(reader.read(float64) ~= 1.7976931348623158e100'f64);
     check(reader.readStr() == "abc");
     check(reader.sequenceLength() == 42);
