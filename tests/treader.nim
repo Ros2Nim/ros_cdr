@@ -147,9 +147,9 @@ suite "CdrReader":
     testInts([0.uint8, 255, 3])
   test "read i16 ":
     testInts([-32768.int16, 32767, -3])
-  # test "read u16 ":
-  #   testInts([0.uint16, 65535, 3])
-  # test "read i32 ":
-  #   testInts([-2147483648.int32, 2147483647, 3])
-  # test "read u32 ":
-  #   testInts( [0.uint32, 4294967295.uint32, 3])
+  test "read u16 ":
+    testInts([0.uint16, 65535, 3])
+  test "read i32 ":
+    testInts([-2147483648.int32, 2147483647, 3])
+  test "read u32 ":
+    testInts( [0.uint32, 4294967295.uint32, 3])
