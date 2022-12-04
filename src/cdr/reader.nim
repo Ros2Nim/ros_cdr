@@ -50,14 +50,15 @@ proc readBe*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
 import os
 
 proc readStr*(this: CdrReader): string =
-    let ll = this.read(uint32).int
-    if ll > 100:
-      raise newException(CdrError, "error, len too large: " & $ll)
-    if ll <= 1:
+    let length = int(this.read(uint32))
+    if length <= 1:
+      for i in 0..<length:
+        discard this.ss.readChar()
       return ""
-    result = this.ss.readStr(ll-1)
+    result = this.ss.readStr(length-1)
     # this.ss.setPosition(this.ss.getPosition()+1)
-    assert this.ss.readChar() == char(0)
+    let ch = this.ss.readChar()
+    assert ch == char(0)
 
 proc sequenceLength*(this: CdrReader): int =
     return int(this.read(uint32))
@@ -96,4 +97,5 @@ proc readStrSeq*(
     this: CdrReader,
 ): seq[string] =
   let count = this.sequenceLength()
+  echo "readStrSeq:count: ", count
   readStrSeq(this, count)
