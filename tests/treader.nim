@@ -78,7 +78,7 @@ suite "CdrReader":
     check(reader.read(uint32) == 1628813225) # uint32 sec
     check(reader.read(uint32) == 32141477) # uint32 nsec
     # string node
-    check(reader.readStr == "/_ros2cli_378363")
+    check(reader.readStr() == "/_ros2cli_378363")
 
     # Parameter[] new_parameters
     check(reader.sequenceLength() == 1)

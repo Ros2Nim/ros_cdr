@@ -60,7 +60,7 @@ proc readStr*(this: CdrReader): string =
     assert this.ss.readChar() == char(0)
 
 proc sequenceLength*(this: CdrReader): int =
-    return int(this.ss.readuint32())
+    return int(this.read(uint32))
   
 proc readSeq*[T: SomeInteger|SomeFloat](
     this: CdrReader,
@@ -75,15 +75,14 @@ proc readSeq*[T: SomeInteger|SomeFloat](
   else:
     result = newSeqOfCap[T](count)
     for i in 0 ..< count:
-      var tmp: T
-      this.ss.read(tmp)
-      result.add(tmp)
+      result.add(this.read(tp))
 
 proc readSeq*[T: SomeInteger|SomeFloat](
     this: CdrReader,
     tp: typedesc[T],
 ): seq[T] =
-  readSeq(this, tp, this.sequenceLength())
+  let count = this.sequenceLength()
+  readSeq(this, tp, count)
 
 proc readStrSeq*(
     this: CdrReader,
