@@ -84,7 +84,7 @@ proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter {.
   this.align(sizeof(T))
   this.ss.writeBe(val)
 
-proc writeStr*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
+proc write*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
   let strlen = value.len
   this.write(uint32(strlen+1))
   this.ss.write(value)
