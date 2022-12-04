@@ -11,6 +11,7 @@ import stew/byteutils
 
 import cdr/cdrtypes
 import cdr/writer
+import cdr/reader
 
 # Example tf2_msgs/TFMessage
 const tf2_msg_TFMessage: string =
@@ -52,5 +53,53 @@ suite "CdrWriter":
     check writer.isLittleEndian() == true
     writeExampleMessage(writer)
     check(writer.getPosition() == 100)
+
     let res_msg_TFMessage = toHex(writer.data).toLowerAscii
     check(res_msg_TFMessage == tf2_msg_TFMessage)
+  
+  test "serializes an example message with external preallocation":
+    let data = $cast[string](tf2_msg_TFMessage.hexToSeqByte())
+    check tf2_msg_TFMessage == data.toHex().toLowerAscii()
+
+    var writer = newCdrWriter(buffer = some newString(100))
+    check writer.isLittleEndian() == true
+    writeExampleMessage(writer)
+    let res_msg_TFMessage = toHex(writer.data).toLowerAscii
+    check(res_msg_TFMessage == tf2_msg_TFMessage)
+
+  test "round trips all data types":
+    let writer = newCdrWriter()
+    writer.write(int8 -1);
+    writer.write(uint8 2);
+    writer.write(int16 -300);
+    writer.write(uint16 400);
+    writer.write(int32 -500_000);
+    writer.write(uint32 600_000);
+    writer.write(int64 -7_000_000_001);
+    writer.write(uint64 8_000_000_003);
+    writer.writeBe(uint16 0x1234);
+    writer.writeBe(uint32 0x12345678);
+    writer.writeBe(uint64 0x123456789abcdef0);
+    writer.write(float32 -9.14);
+    writer.write(float64 1.7976931348623158e100);
+    writer.write("abc");
+    writer.sequenceLength(42);
+    let data = writer.data;
+    check(data.len == 80);
+
+    let reader = newCdrReader(data)
+    check(reader.read(int8) == -1);
+    check(reader.read(uint8) == 2);
+    check(reader.read(int16) == -300);
+    check(reader.read(uint16) == 400);
+    check(reader.read(int32) == -500_000);
+    check(reader.read(uint32) == 600_000);
+    check(reader.read(int64) == -7_000_000_001);
+    check(reader.read(uint64) == 8_000_000_003);
+    check(reader.readBe(uint16) == 0x1234);
+    check(reader.readBe(uint32) == 0x12345678);
+    check(reader.readBe(uint64) == 0x123456789abcdef0);
+    check(reader.read(float32) ~= -9.14);
+    check(reader.read(float64) ~= 1.7976931348623158e100);
+    check(reader.readStr() == "abc");
+    check(reader.sequenceLength() == 42);
