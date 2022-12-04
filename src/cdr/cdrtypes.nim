@@ -45,7 +45,7 @@ proc readBe*[T: SomeInteger|SomeFloat](ss: Stream, x: typedesc[T]): T =
   var tmp: T
   assert ss.readData(addr(tmp), sizeof(x)) == sizeof(x)
   when sizeof(T) == 1:
-    result = x
+    result = tmp
   elif sizeof(T) == 2:
     bigEndian16(result.addr, tmp.addr)
   elif sizeof(T) == 4:
@@ -60,7 +60,7 @@ proc readLe*[T: SomeInteger|SomeFloat](ss: Stream, x: typedesc[T]): T =
   var tmp: T
   assert ss.readData(addr(tmp), sizeof(x)) == sizeof(x)
   when sizeof(T) == 1:
-    result = x
+    result = tmp
   elif sizeof(T) == 2:
     littleEndian16(result.addr, tmp.addr)
   elif sizeof(T) == 4:

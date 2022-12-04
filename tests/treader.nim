@@ -41,10 +41,10 @@ suite "CdrReader":
     # time stamp
     check(reader.read(uint32) == 1490149580) # uint32 sec # 0x58D1E0CC
     check(reader.read(uint32) == 117017840) # uint32 nsec
-    let xx = reader.readString()
+    let xx = reader.readStr()
     check(xx == "base_link") # string frame_id
     echo ""
-    let yy = reader.readString()
+    let yy = reader.readStr()
     echo "yy:len: ", yy.len(), " ", "radar".len()
     echo "yy: `", yy, "`"
     check(yy == "radar") # string child_frame_id
@@ -90,11 +90,11 @@ suite "CdrReader":
     check(reader.read(float64) == 0) # float64 double_value
     check(reader.readStr() == "") # string string_value
 
-    check(reader.readSeq(int8) == newSeq int8) # byte[] byte_array_value
-    check(reader.readSeq(uint8) == newSeq uint8) # bool[] bool_array_value
-    check(reader.readSeq(int64) == newSeq int64) # int64[] integer_array_value
-    check(reader.readSeq(float64) == newSeq float64) # float64[] double_array_value
-    check(reader.readStringSeq() == newSeq string) # string[] string_array_value
+    check(reader.readSeq(int8) == newSeq[int8]()) # byte[] byte_array_value
+    check(reader.readSeq(uint8) == newSeq[uint8]()) # bool[] bool_array_value
+    check(reader.readSeq(int64) == newSeq[int64]()) # int64[] integer_array_value
+    check(reader.readSeq(float64) == newSeq[float64]()) # float64[] double_array_value
+    check(reader.readStrSeq() == newSeq[string]()) # string[] string_array_value
 
     # Parameter[] changed_parameters
     check(reader.sequenceLength() == 0)
@@ -102,4 +102,4 @@ suite "CdrReader":
     # Parameter[] deleted_parameters
     check(reader.sequenceLength() == 0)
 
-    check(reader.offset == data.length)
+    check(reader.getPosition() == data.len)

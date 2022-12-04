@@ -64,19 +64,37 @@ proc sequenceLength*(this: CdrReader): int =
   
 proc readSeq*[T: SomeInteger|SomeFloat](
     this: CdrReader,
-    tp: typedesc[T]
+    tp: typedesc[T],
+    count: int
 ): seq[T] =
   when sizeof(T) == 1:
-    result = newSeq[int8](count)
+    result = newSeq[T](count)
     let cnt = this.ss.readData(result.addr, count)
     if cnt != count:
       raise newException(CdrError, "error reading int8 array")
   else:
     result = newSeqOfCap[T](count)
     for i in 0 ..< count:
-      result.add(this.ss.read(T))
+      var tmp: T
+      this.ss.read(tmp)
+      result.add(tmp)
 
-proc readStringSeq*(this: CdrReader, count: int = this.sequenceLength()): seq[string] =
-    result = newSeqOfCap[string](count)
-    for i in 0 ..< count:
-      result.add(this.readStr())
+proc readSeq*[T: SomeInteger|SomeFloat](
+    this: CdrReader,
+    tp: typedesc[T],
+): seq[T] =
+  readSeq(this, tp, this.sequenceLength())
+
+proc readStrSeq*(
+    this: CdrReader,
+    count: int
+): seq[string] =
+  result = newSeqOfCap[string](count)
+  for i in 0 ..< count:
+    result.add(this.readStr())
+
+proc readStrSeq*(
+    this: CdrReader,
+): seq[string] =
+  let count = this.sequenceLength()
+  readStrSeq(this, count)
