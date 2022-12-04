@@ -73,16 +73,16 @@ proc align*(this: CdrWriter, size: int, bytesToWrite: int = size): void =
   for i in 0 ..< padding:
     this.ss.write(0'u8)
 
-proc write*[T: SomeFloat|SomeInteger](this: CdrWriter, val: T): CdrWriter {.discardable.} =
-  this.align(sizeof(T))
+proc write*(this: CdrWriter, val: SomeFloat|SomeInteger): CdrWriter {.discardable.} =
+  this.align(sizeof(typeof(val)))
   result = this
   if this.littleEndian:
     this.ss.writeLe(val)
   else:
     this.ss.writeBe(val)
 
-proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter {.discardable.} =
-  this.align(sizeof(T))
+proc writeBe*(this: CdrWriter, val: SomeFloat|SomeInteger): CdrWriter {.discardable.} =
+  this.align(sizeof(typeof(val)))
   this.ss.writeBe(val)
 
 proc write*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
@@ -95,9 +95,9 @@ proc write*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
 proc sequenceLength*(this: CdrWriter, value: int): CdrWriter {.discardable.} =
   return this.write(uint32(value))
 
-proc writeArray*[T: SomeInteger|SomeFloat|string](
+proc writeArray*(
     this: CdrWriter,
-    value: openArray[T],
+    value: openArray[SomeInteger|SomeFloat|string],
     writeLength: bool = true
 ): CdrWriter {.discardable.} =
     if writeLength == true:

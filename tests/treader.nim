@@ -168,3 +168,17 @@ suite "CdrReader":
     testReads [-3.835'f32, 0, 3.1415]
   test "reads farray float32Array":
     testReads [1'f32, 2, 3, 4, 5, 6, 7, 8, 9, 10, -0.123456789121212121212]
+
+  test "reads multiple arrays":
+    const writer = newCdrWriter()
+    echo "writer 1"
+    writer.write([5.5'f32, 6.5])
+    echo "writer 2"
+    writer.write([7.5'f32, 8.5])
+    echo "writer 3"
+
+    let reader = newCdrReader(writer.data)
+    echo "reader: ", reader.ss.data.toHex
+    # check(reader.read(float32) == [5.5'f32, 6.5])
+    # check(reader.read(float32) == [7.5'f32, 8.5])
+    check(reader.offset == writer.getPosition())
