@@ -21,7 +21,7 @@ type
     ss: StringStream
 
 proc data*(this: CdrWriter): string =
-  return this.ss.data
+  return this.ss.data[0..<this.ss.getPosition]
 
 proc getPosition*(this: CdrWriter, ): int =
   return this.ss.getPosition()

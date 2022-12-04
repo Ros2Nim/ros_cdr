@@ -108,6 +108,7 @@ suite "CdrWriter":
     let writer = newCdrWriter(kind= some EncapsulationKind.PL_CDR_LE)
     writer.write(uint8(0x42))
     check(toHex(writer.data) == "0003000042")
+    echo "lists"
 
   test "aligns":
     let writer = newCdrWriter()
