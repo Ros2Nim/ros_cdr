@@ -153,3 +153,18 @@ suite "CdrReader":
     testInts([-2147483648.int32, 2147483647, 3])
   test "read u32 ":
     testInts( [0.uint32, 4294967295.uint32, 3])
+
+  template testReads(expected: untyped) =
+    let writer = newCdrWriter()
+    writer.writeArray(expected)
+
+    let reader = newCdrReader(writer.data)
+    let res = reader.readSeq(typeof(expected[0]))
+    check res == expected
+
+  test "reads farray float32Array":
+    testReads [-3.835'f32, 0, 3.1415]
+  test "reads farray float32Array":
+    testReads [-3.835'f32, 0, 3.1415]
+  test "reads farray float32Array":
+    testReads [1'f32, 2, 3, 4, 5, 6, 7, 8, 9, 10, -0.123456789121212121212]
