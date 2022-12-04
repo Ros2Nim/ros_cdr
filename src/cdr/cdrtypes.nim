@@ -31,11 +31,11 @@ proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
   when sizeof(T) == 1:
     tmp = x
   elif sizeof(T) == 2:
-    bigEndian16(tmp.addr, x.unsafeAddr)
+    litleEndian16(tmp.addr, x.unsafeAddr)
   elif sizeof(T) == 4:
-    bigEndian32(tmp.addr, x.unsafeAddr)
+    littleEndian32(tmp.addr, x.unsafeAddr)
   elif sizeof(T) == 8:
-    bigEndian64(tmp.addr, x.unsafeAddr)
+    littleEndian64(tmp.addr, x.unsafeAddr)
   else:
     error("unhandled size")
   writeData(s, addr(tmp), sizeof(x))

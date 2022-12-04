@@ -30,8 +30,8 @@ proc writeExampleMessage(writer: CdrWriter) =
   # // time stamp
   writer.write uint32(1490149580) #// uint32 sec
   writer.write uint32(117017840) #// uint32 nsec
-  writer.write "base_link" #// string frame_id
-  writer.write "radar" #// string child_frame_id
+  writer.writeStr "base_link" #// string frame_id
+  writer.writeStr "radar" #// string child_frame_id
   # // geometry_msgs/Transform transform
   # // geometry_msgs/Vector3 translation
   writer.write float64(3.835) #// float64 x
@@ -52,4 +52,5 @@ suite "CdrWriter":
     check writer.isLittleEndian() == true
     writeExampleMessage(writer)
     check(writer.getPosition() == 100)
-    check(toHex(writer.data) == tf2_msg_TFMessage)
+    let res_msg_TFMessage = toHex(writer.data).toLowerAscii
+    check(res_msg_TFMessage == tf2_msg_TFMessage)

@@ -84,7 +84,7 @@ proc writeBe*[T: SomeFloat | SomeInteger](this: CdrWriter, val: T): CdrWriter {.
   this.align(sizeof(T))
   this.ss.writeBe(val)
 
-proc write*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
+proc writeStr*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
   let strlen = value.len
   this.write(uint32(strlen))
   this.ss.write(uint8(0)) # add null terminator
@@ -93,7 +93,7 @@ proc write*(this: CdrWriter, value: string): CdrWriter {.discardable.} =
 proc sequenceLength*(this: CdrWriter, value: int): CdrWriter {.discardable.} =
   return this.write(uint32(value))
 
-proc write*[T: SomeInteger|SomeFloat|string](
+proc writeArray*[T: SomeInteger|SomeFloat|string](
     this: CdrWriter,
     value: openArray[T],
     writeLength: bool = false
