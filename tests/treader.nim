@@ -82,38 +82,24 @@ suite "CdrReader":
 
     # Parameter[] new_parameters
     check(reader.sequenceLength() == 1)
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readStr() == "use_sim_time") # string name
-    echo("reader.getPosition(): ", reader.getPosition())
     # ParameterValue value
     check(reader.read(uint8) == 1) # uint8 type
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.read(int8) == 0) # bool bool_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.read(int64) == 0) # int64 integer_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.read(float64) == 0) # float64 double_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readStr() == "") # string string_value
 
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readSeq(int8) == newSeq[int8]()) # byte[] byte_array_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readSeq(uint8) == newSeq[uint8]()) # bool[] bool_array_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readSeq(int64) == newSeq[int64]()) # int64[] integer_array_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readSeq(float64) == newSeq[float64]()) # float64[] double_array_value
-    echo("reader.getPosition(): ", reader.getPosition())
     check(reader.readStrSeq() == newSeq[string]()) # string[] string_array_value
-    echo("reader.getPosition(): ", reader.getPosition())
 
     # Parameter[] changed_parameters
     check(reader.sequenceLength() == 0)
-    echo("reader.getPosition(): ", reader.getPosition())
 
     # Parameter[] deleted_parameters
     check(reader.sequenceLength() == 0)
-    echo("reader.getPosition(): ", reader.getPosition())
 
     check(reader.getPosition() == data.len)
