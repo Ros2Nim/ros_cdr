@@ -103,3 +103,15 @@ suite "CdrReader":
     check(reader.sequenceLength() == 0)
 
     check(reader.getPosition() == data.len)
+
+  test "reads big endian values":
+    let datastr = "000100001234000056789abcdef0000000000000"
+    let data = $cast[string](datastr.hexToSeqByte())
+    check datastr == data.toHex().toLowerAscii()
+
+    # echo "tf2_msg_TFMessage: ", toHex(data)
+    let reader = newCdrReader(data)
+
+    check(reader.readBe(uint16) == 0x1234'u16)
+    check(reader.readBe(uint32) == 0x56789abc'u32)
+    check(reader.readBe(uint64) == 0xdef0000000000000'u64)
