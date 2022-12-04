@@ -103,3 +103,20 @@ suite "CdrWriter":
     check(reader.read(float64) ~= 1.7976931348623158e100'f64);
     check(reader.readStr() == "abc");
     check(reader.sequenceLength() == 42);
+  
+  test "writes parameter lists":
+    let writer = newCdrWriter(kind= some EncapsulationKind.PL_CDR_LE)
+    writer.write(uint8(0x42))
+    check(toHex(writer.data) == "0003000042")
+
+  test "aligns":
+    let writer = newCdrWriter()
+    writer.align(0)
+    check(toHex(writer.data) == "00010000");
+    writer.align(8);
+    check(toHex(writer.data) == "00010000");
+    writer.write(uint8(1)); #// one byte
+    writer.align(8); #// seven bytes of padding
+    writer.write(uint32(2)); #// four bytes
+    writer.align(4); #// no-op, already aligned
+    check(toHex(writer.data) == "00010000010000000000000002000000");

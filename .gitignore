@@ -3,3 +3,4 @@ src/cdr/writer
 tests/twriter
 src/cdr/cdrtypes
 tests/treader
+src/cdr/reader

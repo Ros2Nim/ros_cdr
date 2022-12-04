@@ -63,7 +63,7 @@ proc newCdrWriter*(
   result.ss.writeBe(0'u16)
   assert result.ss.getPosition() == 4
 
-proc align(this: CdrWriter, size: int, bytesToWrite: int = size): void =
+proc align*(this: CdrWriter, size: int, bytesToWrite: int = size): void =
     let alignment = (this.ss.getPosition() - 4) mod size
     let padding = if alignment > 0: size - alignment else: 0
     echo "set alignment: ", size, " align: ", alignment, " to ", $(size-alignment)
@@ -99,6 +99,7 @@ proc writeArray*[T: SomeInteger|SomeFloat|string](
     value: openArray[T],
     writeLength: bool = false
 ): CdrWriter {.discardable.} =
+    echo "writeArray: TP: ", $(T)
     if writeLength == true:
       this.sequenceLength(value.len)
     this.ss.resizeIfNeeded(value.len)

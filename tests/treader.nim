@@ -137,16 +137,19 @@ suite "CdrReader":
     writer.writeArray(expected)
 
     let reader = newCdrReader(writer.data)
-    let vals = reader.readSeq(typeof(expected[0]),reader.sequenceLength())
+    echo "data: array: ", reader.ss.data.tohex()
+    let vals = reader.readSeq(typeof(expected[0]), reader.sequenceLength())
     check vals == expected
 
-  # for name, expected in fieldPairs((
-  #                   [-128.int8, 127, 3],
-  #                   [0.uint8, 255, 3],
-  #                   [-32768.int16, 32767, -3],
-  #                   [0.uint16, 65535, 3],
-  #                   [-2147483648.int32, 2147483647, 3],
-  #                   [0.uint32, 4294967295.uint32, 3]
-  #                 )):
-  #   test "read ints":
-  #     testInts(expected)
+  test "read ints ":
+    testInts([-128.int8, 127, 3])
+  # test "read u8 ":
+  #   testInts([0.uint8, 255, 3])
+  test "read i16 ":
+    testInts([-32768.int16, 32767, -3])
+  # test "read u16 ":
+  #   testInts([0.uint16, 65535, 3])
+  # test "read i32 ":
+  #   testInts([-2147483648.int32, 2147483647, 3])
+  # test "read u32 ":
+  #   testInts( [0.uint32, 4294967295.uint32, 3])

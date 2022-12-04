@@ -89,11 +89,12 @@ proc readSeq*[T: SomeInteger|SomeFloat](
     tp: typedesc[T],
     count: int
 ): seq[T] =
+  assert count <= 10_000, "count too large: " & $count
   when sizeof(T) == 1:
     result = newSeq[T](count)
     let cnt = this.ss.readData(result.addr, count)
     if cnt != count:
-      raise newException(CdrError, "error reading int8 array")
+      raise newException(CdrError, "error reading array, len read: " & $cnt & " // " & $count)
   else:
     result = newSeqOfCap[T](count)
     for i in 0 ..< count:
