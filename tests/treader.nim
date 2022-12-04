@@ -184,3 +184,15 @@ suite "CdrReader":
     for i in 0..<res2.len():
       check res2[i] == exp2[i]
     check(reader.getPosition == writer.getPosition())
+
+  test "reads stringArray":
+    let writer = newCdrWriter()
+    writer.sequenceLength(3);
+    writer.write("abc");
+    writer.write("");
+    writer.write("test string");
+
+    let reader = newCdrReader(writer.data)
+
+    check(reader.readStrSeq(reader.sequenceLength()) == @["abc", "", "test string"])
+    check(reader.getPosition == writer.data.len)
