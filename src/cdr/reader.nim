@@ -36,6 +36,27 @@ proc align(this: CdrReader, size: int): void =
     if (alignment > 0):
       this.ss.setPosition(this.ss.getPosition() + size - alignment)
 
+proc seek*(this: CdrReader, relativeOffset: int): void =
+  ##/**
+  ##  * Seek the current read pointer a number of bytes relative to the current position. Note that
+  ##  * seeking before the four-byte header is invalid
+  ##  * @param relativeOffset A positive or negative number of bytes to seek
+  ##  */
+  let newOffset = this.ss.getPosition() + relativeOffset
+  if newOffset < 4 or newOffset >= this.ss.data.len:
+    raise newException(CdrError, "seek(" & $relativeOffset & ") failed, " & $newOffset & " is outside the data range")
+  this.ss.setPosition newOffset
+
+proc seekTo*(this: CdrReader, offset: int): void =
+  ##
+  ## Seek to an absolute byte position in the data. Note that seeking before the four-byte header is
+  ## invalid
+  ## @param offset An absolute byte offset in the range of [4-byteLength)
+  ##
+  if offset < 4 or offset >= this.ss.data.len:
+    raise newException(CdrError, "seekTo(" & $offset & ") failed, value is outside the data range");
+  this.ss.setPosition(offset)
+
 proc read*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
   this.align(sizeof(tp))
   if this.littleEndian:

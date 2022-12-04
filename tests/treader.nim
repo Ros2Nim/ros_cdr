@@ -115,3 +115,18 @@ suite "CdrReader":
     check(reader.readBe(uint16) == 0x1234'u16)
     check(reader.readBe(uint32) == 0x56789abc'u32)
     check(reader.readBe(uint64) == 0xdef0000000000000'u64)
+
+  test "seeks to absolute and relative positions":
+    let data = $cast[string](tf2_msg_TFMessage.hexToSeqByte())
+    var reader = newCdrReader(data);
+
+    reader.seekTo(4 + 4 + 4 + 4 + 4 + 10 + 4 + 6);
+    check(reader.read(float64) ~= 3.835)
+
+    # // This works due to aligned reads
+    reader.seekTo(4 + 4 + 4 + 4 + 4 + 10 + 4 + 3);
+    check(reader.read(float64) ~= 3.835)
+
+    reader.seek(-8);
+    check(reader.read(float64) ~= 3.835)
+    check(reader.read(float64) ~= 0)
