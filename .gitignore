@@ -4,3 +4,4 @@ tests/twriter
 src/cdr/cdrtypes
 tests/treader
 src/cdr/reader
+/deps/Fast-CDR
