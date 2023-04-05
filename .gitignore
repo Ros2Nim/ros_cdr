@@ -5,3 +5,4 @@ src/cdr/cdrtypes
 tests/treader
 src/cdr/reader
 /deps/Fast-CDR
+/tests/tbasic_types

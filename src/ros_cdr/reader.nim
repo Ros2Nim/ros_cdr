@@ -57,14 +57,14 @@ proc seekTo*(this: CdrReader, offset: int): void =
     raise newException(CdrError, "seekTo(" & $offset & ") failed, value is outside the data range");
   this.ss.setPosition(offset)
 
-proc read*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
+proc read*[T: CdrBasicTypes](this: CdrReader, tp: typedesc[T]): T =
   this.align(sizeof(tp))
   if this.littleEndian:
     result = this.ss.readLe(tp)
   else:
     result = this.ss.readBe(tp)
 
-proc readBe*[T: SomeInteger|SomeFloat](this: CdrReader, tp: typedesc[T]): T =
+proc readBe*[T: CdrBasicTypes](this: CdrReader, tp: typedesc[T]): T =
   this.align(sizeof(tp))
   result = this.ss.readBe(tp)
 
@@ -84,7 +84,7 @@ proc readStr*(this: CdrReader): string =
 proc sequenceLength*(this: CdrReader): int =
     return int(this.read(uint32))
   
-proc readSeq*[T: SomeInteger|SomeFloat](
+proc readSeq*[T: CdrBasicTypes](
     this: CdrReader,
     tp: typedesc[T],
     count: int
@@ -94,9 +94,8 @@ proc readSeq*[T: SomeInteger|SomeFloat](
   for i in 0 ..< count:
     result.add(this.read(tp))
 
-import stew/byteutils
 
-proc readSeq*[T: SomeInteger|SomeFloat](
+proc readSeq*[T: CdrBasicTypes](
     this: CdrReader,
     tp: typedesc[T],
 ): seq[T] =

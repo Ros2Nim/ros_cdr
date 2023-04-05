@@ -9,8 +9,9 @@ type
 
 type
   CdrError* = object of ValueError
+  CdrBasicTypes* = SomeInteger or SomeFloat or bool or byte or char
 
-proc writeBe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
+proc writeBe*[T: CdrBasicTypes](s: Stream, x: T) =
   ## BigEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
   var tmp: T
   when sizeof(T) == 1:
@@ -25,9 +26,11 @@ proc writeBe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
     error("unhandled size")
   writeData(s, addr(tmp), sizeof(x))
 
-proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
+proc writeLe*[T: CdrBasicTypes](s: Stream, x: T) =
   ## LittleEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
   var tmp: T
+  static:
+    echo "writeLe: ", typeof(T)
   when sizeof(T) == 1:
     tmp = x
   elif sizeof(T) == 2:
@@ -40,7 +43,7 @@ proc writeLe*[T: SomeInteger|SomeFloat](s: Stream, x: T) =
     error("unhandled size")
   writeData(s, addr(tmp), sizeof(x))
 
-proc readBe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
+proc readBe*[T: CdrBasicTypes](ss: StringStream, x: typedesc[T]): T =
   ## BigEndian version of generic read procedure. 
   var tmp: T
   assert ss.readData(addr(tmp), sizeof(x)) == sizeof(x)
@@ -55,7 +58,7 @@ proc readBe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
   else:
     error("unhandled size")
 
-proc readLe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
+proc readLe*[T: CdrBasicTypes](ss: StringStream, x: typedesc[T]): T =
   ## LittleEndian version of generic read procedure. 
   var tmp: T
   let cnt = ss.readData(addr(tmp), sizeof(x))
@@ -71,3 +74,13 @@ proc readLe*[T: SomeInteger|SomeFloat](ss: StringStream, x: typedesc[T]): T =
   else:
     error("unhandled size")
   
+proc writeBe*[T: bool](s: Stream, x: T) =
+  writeBe(s, if x: 1'u8 else: 0'u8)
+proc writeLe*[T: bool](s: Stream, x: T) =
+  writeLe(s, if x: 1'u8 else: 0'u8)
+proc readBe*[T: bool](ss: StringStream, x: typedesc[T]): T =
+  let res = readBe(ss, int8)
+  if res: true else: false
+proc readLe*[T: bool](ss: StringStream, x: typedesc[T]): T =
+  let res = readLe(ss, int8)
+  if res: true else: false
