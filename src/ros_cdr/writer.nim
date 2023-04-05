@@ -69,7 +69,6 @@ proc align*(this: CdrWriter, size: int, bytesToWrite: int = size): void =
   let alignment = (this.ss.getPosition() - 4) mod size
   let padding = if alignment > 0: size - alignment else: 0
 
-  echo "padding: ", padding
   # // Write padding bytes
   for i in 0 ..< padding:
     this.ss.write(0'u8)

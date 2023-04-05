@@ -29,8 +29,6 @@ proc writeBe*[T: CdrBasicTypes](s: Stream, x: T) =
 proc writeLe*[T: CdrBasicTypes](s: Stream, x: T) =
   ## LittleEndian version of generic write procedure. Writes `x` to the stream `s`. Implementation:
   var tmp: T
-  static:
-    echo "writeLe: ", typeof(T)
   when sizeof(T) == 1:
     tmp = x
   elif sizeof(T) == 2:
