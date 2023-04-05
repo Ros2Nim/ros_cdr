@@ -21,9 +21,9 @@ proc `~=` *[T: float32](x, y: T): bool =
   near(x, y, 1.0e-4)
 
 
-suite "CdrWriter":
+suite "Cdr Write":
 
-  test "round trips all data types":
+  test "test_interface_files/msg/BasicTypes.msg":
     let writer = newCdrWriter()
     writer.write bool true
     writer.write byte 0x7
@@ -31,27 +31,13 @@ suite "CdrWriter":
     writer.write float64 3.1415
     writer.write int8 0x5
     writer.write uint8 0x7
-    writer.write uint64 0xFFFFFFFFFFF
+    writer.write int16 0x123
+    writer.write uint16 0x123
+    writer.write int32 0x56123
+    writer.write uint32 0x56123
+    writer.write int64 0x56123
+    writer.write uint64 0xFF_FF_FF_FF_FF_FF_BB_AA'u64
 
     let data = writer.data
-    # check(data.len == 52)
     echo "hex: ", toHex(data)
-    echo "exp: ", "0001000001070000cba12d406f1283c0ca210940050700000000000000000000000000000000000000000000ffffffffff0f0000"
-    # check toHex(data) == "0001000001070000cba12d406f1283c0ca210940050700000000000000000000000000000000000000000000ffffffffff0f0000"
-
-    # actual   "00010000010000000000000007000000CBA12D406F1283C0CA2109400507000000000000FFFFFFFFFF0F0000"
-
-    # expected "0001000001070000CBA12D406F1283C0CA210940050700000000000000000000000000000000000000000000FFFFFFFFFF0F0000"
-
-
-  # test "aligns":
-  #   let writer = newCdrWriter()
-  #   writer.align(0)
-  #   check(toHex(writer.data) == "00010000");
-  #   writer.align(8);
-  #   check(toHex(writer.data) == "00010000");
-  #   writer.write(uint8(1)); #// one byte
-  #   writer.align(8); #// seven bytes of padding
-  #   writer.write(uint32(2)); #// four bytes
-  #   writer.align(4); #// no-op, already aligned
-  #   check(toHex(writer.data) == "00010000010000000000000002000000");
+    check toHex(data) == "0001000001070000CBA12D406F1283C0CA210940050723012301000023610500236105002361050000000000AABBFFFFFFFFFFFF"
